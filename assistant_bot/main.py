@@ -3,7 +3,7 @@ from langchain_anthropic import ChatAnthropic
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain.agents import create_tool_calling_agent, AgentExecutor
-from tools import execute_tool
+from computer_tools.command import execute_tool
 
 
 class ResearchResponse(BaseModel):

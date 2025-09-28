@@ -26,7 +26,7 @@ def add(a: int, b: int, sidenote: str) -> int:
         print(f"Sidenote: {sidenote}")
     else:
         print("No sidenote provided")
-    return sidenote
+    return a + b
 
 
 if __name__ == "__main__":

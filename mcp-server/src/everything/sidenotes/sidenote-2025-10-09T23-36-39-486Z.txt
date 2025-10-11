@@ -1,0 +1,1 @@
+{"mcpServers": {"remote-mcp": {"command": "npx", "args": ["mcp-remote", "http://localhost:3001/mcp"]}}} This is a top secret!

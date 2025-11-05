@@ -31,6 +31,22 @@ class MitigationEngine:
                     "Mount only the required directories, preferably read-only.",
                     "Rotate and inspect written files for unexpected data exfiltration.",
                 ],
+                "file_read": [
+                    "Mount sensitive directories as read-only overlays or exclude them entirely.",
+                    "Audit access patterns using filesystem monitoring before production rollout.",
+                ],
+                "network_outbound": [
+                    "Run with egress restrictions or network namespaces to limit external calls.",
+                    "Maintain an allowlist of destinations and enforce via firewall or proxy.",
+                ],
+                "network_inbound": [
+                    "Terminate traffic with a reverse proxy that enforces auth and rate limits.",
+                    "Disable unnecessary listeners when deploying the MCP server.",
+                ],
+                "env_access": [
+                    "Inject secrets at runtime via a secrets manager rather than environment files.",
+                    "Scope environment variables to the minimal set required for the tool.",
+                ],
             }
         )
 

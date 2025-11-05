@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from typing import Iterable, List
+from typing import List
 
 from detection.core.models import CapabilityFinding, DetectionResult
 
@@ -33,7 +33,9 @@ class ReportBuilder:
         ]
         for finding in result.findings:
             sources = ", ".join(source.value for source in finding.sources) or "unknown"
-            lines.append(f"- **{finding.name}** ({finding.confidence:.2f}) — {finding.description} *(sources: {sources})*")
+            lines.append(
+                f"- **{finding.name}** ({finding.confidence:.2f}) — {finding.description} *(sources: {sources})*"
+            )
         if result.mitigations:
             lines.append("")
             lines.append("## Recommended Mitigations")

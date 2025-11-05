@@ -1,8 +1,0 @@
-# Placeholder keyword definitions for the static detector.
-#
-# Example schema:
-# - name: command_exec
-#   description: Detects process execution primitives.
-#   patterns:
-#     - subprocess.run
-#     - os.system

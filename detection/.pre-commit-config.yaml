@@ -13,7 +13,7 @@ repos:
     rev: v2.3.0
     hooks:
       - id: codespell
-        args: [--ignore-words=docs/ignore_words.txt]
+        args: [--ignore-words=detection/docs/ignore_words.txt]
         additional_dependencies: []
   - repo: local
     hooks:
@@ -21,6 +21,7 @@ repos:
         name: Format Python with Black via uv
         entry: uv
         language: system
+        files: ^(detection/|pytest/)
         types: [python]
         args:
           - run
@@ -32,7 +33,10 @@ repos:
         entry: uv
         language: system
         pass_filenames: false
+        files: ^(detection/|pytest/|tests/)
         args:
           - run
+          - python
+          - -m
           - pytest
-          - -q
+          - detection/tests

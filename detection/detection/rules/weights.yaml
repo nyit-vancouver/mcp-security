@@ -1,0 +1,5 @@
+# Default capability weights used by the scoring engine.
+#
+# command_exec: 25.0
+# file_write: 15.0
+# network_outbound: 20.0

@@ -30,6 +30,20 @@ base_confidence = 0.4
     "spawn(",
   ]
 
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "exec",
+    "bash",
+    "eval",
+    "shell",
+    "rm -rf",
+    "chmod",
+    "chown",
+  ]
+
 [[capabilities]]
 name = "file_read"
 description = "Ability to read files from the host filesystem."
@@ -57,6 +71,19 @@ base_confidence = 0.35
     "fs.readFile",
     "fs.readdir",
     "fs.createReadStream",
+  ]
+
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "~/.ssh",
+    "~/.cursor",
+    "/etc/passwd",
+    "read file",
+    "extract",
+    "steal",
   ]
 
 [[capabilities]]
@@ -89,6 +116,18 @@ base_confidence = 0.35
     "fs.mkdir",
   ]
 
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "overwrite",
+    "write",
+    "append",
+    "modify",
+    "log",
+  ]
+
 [[capabilities]]
 name = "network_outbound"
 description = "Ability to perform outbound network requests."
@@ -117,6 +156,18 @@ base_confidence = 0.4
     "fetch(",
     "axios.",
     "http.request",
+  ]
+
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "http://",
+    "https://",
+    "curl",
+    "post",
+    "upload",
   ]
 
 [[capabilities]]
@@ -149,6 +200,18 @@ base_confidence = 0.35
     "ws.Server",
   ]
 
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "listen",
+    "webhook",
+    "callback",
+    "port",
+    "server",
+  ]
+
 [[capabilities]]
 name = "env_access"
 description = "Ability to read environment variables or sensitive configuration."
@@ -169,4 +232,16 @@ base_confidence = 0.3
   patterns = [
     "process.env",
     "dotenv",
+  ]
+
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "api key",
+    "environment variable",
+    "secret",
+    "token",
+    "credential",
   ]

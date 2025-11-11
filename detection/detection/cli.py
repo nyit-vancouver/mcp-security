@@ -47,8 +47,10 @@ def main() -> None:
 
 def _load_builtin_plugins(registry: DetectorRegistry, rulebook: RuleBook) -> None:
     from detection.plugins.static import python as python_static
+    from detection.plugins.static import metadata as metadata_static
 
     python_static.register(registry, rulebook)
+    metadata_static.register(registry, rulebook)
     # Future phases will import additional plugins here.
 
 

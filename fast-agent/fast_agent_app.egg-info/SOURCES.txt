@@ -1,0 +1,8 @@
+agent.py
+pyproject.toml
+fast_agent_app.egg-info/PKG-INFO
+fast_agent_app.egg-info/SOURCES.txt
+fast_agent_app.egg-info/dependency_links.txt
+fast_agent_app.egg-info/entry_points.txt
+fast_agent_app.egg-info/requires.txt
+fast_agent_app.egg-info/top_level.txt

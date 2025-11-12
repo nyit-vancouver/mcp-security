@@ -1,0 +1,2 @@
+[console_scripts]
+fast-agent-app = agent:main

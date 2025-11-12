@@ -1,0 +1,8 @@
+Metadata-Version: 2.4
+Name: fast-agent-app
+Version: 0.1.0
+Summary: a simple fast-agent application
+Requires-Python: <3.14,>=3.13.5
+Description-Content-Type: text/markdown
+Requires-Dist: fast-agent-mcp
+Requires-Dist: requests>=2.32.5

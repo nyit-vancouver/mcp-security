@@ -1,0 +1,2 @@
+fast-agent-mcp
+requests>=2.32.5

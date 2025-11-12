@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  mcp-detector:
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - ./detection_results.json:/app/detection_results.json
+      - ./detection_rules.yaml:/app/detection_rules.yaml
+    environment:
+      - FLASK_ENV=production
+    restart: unless-stopped
+    container_name: mcp-tool-detector

@@ -1,0 +1,364 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Tool Detection Results</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            padding: 30px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stat-card h3 {
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .stat-card .value {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .stat-card.injection .value {
+            color: #dc3545;
+        }
+        
+        .stat-card.normal .value {
+            color: #28a745;
+        }
+        
+        .stat-card.warning .value {
+            color: #ffc107;
+        }
+        
+        .actions {
+            padding: 20px 30px;
+            display: flex;
+            gap: 15px;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        
+        .results-section {
+            padding: 30px;
+        }
+        
+        .results-section h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        
+        .table-container {
+            overflow-x: auto;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.85em;
+            letter-spacing: 1px;
+        }
+        
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        tbody tr:hover {
+            background: #f8f9fa;
+        }
+        
+        .result-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+        
+        .result-normal {
+            background: #d4edda;
+            color: #155724;
+        }
+        
+        .result-injection {
+            background: #f8d7da;
+            color: #721c24;
+            animation: pulse 2s infinite;
+        }
+        
+        .result-warning {
+            background: #fff3cd;
+            color: #856404;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .description {
+            max-width: 500px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        
+        .risk-score {
+            font-weight: bold;
+        }
+        
+        .score-low { color: #28a745; }
+        .score-medium { color: #ffc107; }
+        .score-high { color: #dc3545; }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6c757d;
+        }
+        
+        .empty-state i {
+            font-size: 4em;
+            margin-bottom: 20px;
+            opacity: 0.3;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            background: #f8f9fa;
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🛡️ MCP Tool Detection System</h1>
+            <p>Real-time detection of malicious tool descriptions</p>
+        </header>
+        
+        <div class="stats">
+            <div class="stat-card">
+                <h3>Total Scans</h3>
+                <div class="value">{{ stats.total }}</div>
+            </div>
+            <div class="stat-card injection">
+                <h3>Injections Detected</h3>
+                <div class="value">{{ stats.injection_count }}</div>
+            </div>
+            <div class="stat-card warning">
+                <h3>Warnings</h3>
+                <div class="value">{{ stats.warning_count }}</div>
+            </div>
+            <div class="stat-card normal">
+                <h3>Normal Tools</h3>
+                <div class="value">{{ stats.normal_count }}</div>
+            </div>
+            <div class="stat-card">
+                <h3>Detection Rate</h3>
+                <div class="value">{{ stats.injection_rate }}%</div>
+            </div>
+        </div>
+        
+        <div class="actions">
+            <a href="/test" class="btn btn-primary">🧪 Test New Tool</a>
+            <button onclick="clearResults()" class="btn btn-danger">🗑️ Clear All Results</button>
+            <button onclick="location.reload()" class="btn btn-primary">🔄 Refresh</button>
+        </div>
+        
+        <div class="results-section">
+            <h2>Detection Results</h2>
+            
+            {% if results %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Tool Name</th>
+                            <th>Description</th>
+                            <th>Detection Result</th>
+                            <th>Risk Score</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for result in results %}
+                        <tr>
+                            <td><strong>{{ result.tool_name }}</strong></td>
+                            <td>
+                                <div class="description" title="{{ result.description }}">
+                                    {{ result.description }}
+                                </div>
+                            </td>
+                            <td>
+                                <span class="result-badge result-{{ result.result.lower() }}">
+                                    {% if result.result == 'Injection' %}
+                                        🚨 {{ result.result }}
+                                    {% elif result.result == 'Warning' %}
+                                        ⚠️ {{ result.result }}
+                                    {% else %}
+                                        ✅ {{ result.result }}
+                                    {% endif %}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="risk-score 
+                                    {% if result.risk_score >= 30 %}score-high
+                                    {% elif result.risk_score >= 15 %}score-medium
+                                    {% else %}score-low{% endif %}">
+                                    {{ result.risk_score }}
+                                </span>
+                            </td>
+                            <td>{{ result.timestamp[:19] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state">
+                <div style="font-size: 4em; margin-bottom: 20px;">📋</div>
+                <h3>No detection results yet</h3>
+                <p>Start testing tools to see detection results here</p>
+                <br>
+                <a href="/test" class="btn btn-primary">Test Your First Tool</a>
+            </div>
+            {% endif %}
+        </div>
+        
+        <footer>
+            <p>MCP Tool Detection System | Powered by Python & Flask</p>
+        </footer>
+    </div>
+    
+    <script>
+        function clearResults() {
+            if (confirm('Are you sure you want to clear all detection results?')) {
+                fetch('/clear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error clearing results');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error clearing results');
+                });
+            }
+        }
+    </script>
+</body>
+</html>

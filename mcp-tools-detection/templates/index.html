@@ -94,6 +94,119 @@
             background: #f8f9fa;
             border-bottom: 2px solid #e9ecef;
         }
+
+        .filters-section {
+            padding: 20px 30px;
+            background: white;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .filters-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            align-items: end;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .filter-group label {
+            font-size: 0.85em;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .filter-group select,
+        .filter-group input {
+            padding: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.95em;
+        }
+
+        .filter-group select:focus,
+        .filter-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: #f8f9fa;
+            border-top: 2px solid #e9ecef;
+        }
+
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .pagination-btn {
+            padding: 8px 16px;
+            border: 1px solid #ced4da;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            transition: all 0.2s;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .pagination-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-num {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            background: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s;
+        }
+
+        .page-num:hover {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .page-num.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+            font-weight: bold;
+        }
         
         .btn {
             padding: 12px 24px;
@@ -193,17 +306,227 @@
             background: #fff3cd;
             color: #856404;
         }
-        
+
+        .severity-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.85em;
+            display: inline-block;
+            text-transform: uppercase;
+        }
+
+        .severity-low {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .severity-medium {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .severity-critical {
+            background: #f8d7da;
+            color: #721c24;
+            animation: pulse 2s infinite;
+        }
+
         @keyframes pulse {
             0%, 100% { opacity: 1; }
             50% { opacity: 0.7; }
         }
+
+        .original-description {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            border-left: 4px solid #6c757d;
+        }
+
+        .original-description h4 {
+            margin-bottom: 10px;
+            color: #495057;
+            font-size: 0.9em;
+        }
+
+        .original-description p {
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9em;
+            line-height: 1.5;
+        }
         
         .description {
             max-width: 500px;
+        }
+
+        .description.collapsed {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+        }
+
+        .expand-btn {
+            cursor: pointer;
+            user-select: none;
+            font-size: 1.2em;
+            transition: transform 0.3s;
+        }
+
+        .expand-btn.expanded {
+            transform: rotate(90deg);
+        }
+
+        .details-row {
+            display: none;
+            background: #f8f9fa;
+        }
+
+        .details-row.show {
+            display: table-row;
+        }
+
+        .details-content {
+            padding: 20px;
+        }
+
+        .patterns-grid {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        }
+
+        .pattern-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .pattern-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .capability-name {
+            font-weight: 600;
+            color: #333;
+            font-size: 0.95em;
+        }
+
+        .category-badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.75em;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .category-execution {
+            background: #ffe0e0;
+            color: #c41e3a;
+        }
+
+        .category-file_access {
+            background: #fff4e0;
+            color: #b8860b;
+        }
+
+        .category-network {
+            background: #e0f0ff;
+            color: #0066cc;
+        }
+
+        .confidence-bar {
+            margin: 10px 0;
+        }
+
+        .confidence-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .confidence-progress {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s;
+        }
+
+        .keywords-container {
+            margin-top: 10px;
+        }
+
+        .keywords-label {
+            font-size: 0.85em;
+            color: #6c757d;
+            margin-bottom: 5px;
+        }
+
+        .keyword-tag {
+            display: inline-block;
+            background: #e9ecef;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin: 3px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .capability-tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.75em;
+            margin: 2px;
+            font-weight: 600;
+        }
+
+        .capability-tag.command_exec,
+        .capability-tag.tool_sequence_hijack,
+        .capability-tag.param_override {
+            background: #ffe0e0;
+            color: #c41e3a;
+        }
+
+        .capability-tag.file_read,
+        .capability-tag.file_write,
+        .capability-tag.env_access {
+            background: #fff4e0;
+            color: #b8860b;
+        }
+
+        .capability-tag.network_outbound,
+        .capability-tag.network_inbound {
+            background: #e0f0ff;
+            color: #0066cc;
+        }
+
+        .capability-tag.prompt_injection {
+            background: #ffe0f0;
+            color: #cc0066;
+        }
+
+        .score-info {
+            margin-top: 8px;
+            font-size: 0.85em;
+            color: #6c757d;
+        }
+
+        tbody tr {
+            cursor: pointer;
         }
         
         .risk-score {
@@ -270,29 +593,101 @@
             <button onclick="clearResults()" class="btn btn-danger">🗑️ Clear All Results</button>
             <button onclick="location.reload()" class="btn btn-primary">🔄 Refresh</button>
         </div>
-        
+
+        <div class="filters-section">
+            <form method="get" action="/" id="filterForm">
+                <div class="filters-grid">
+                    <div class="filter-group">
+                        <label for="severity">Severity</label>
+                        <select name="severity" id="severity" onchange="this.form.submit()">
+                            <option value="">All Severities</option>
+                            <option value="low" {% if filters.severity == 'low' %}selected{% endif %}>Low</option>
+                            <option value="medium" {% if filters.severity == 'medium' %}selected{% endif %}>Medium</option>
+                            <option value="critical" {% if filters.severity == 'critical' %}selected{% endif %}>Critical</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="result">Result Type</label>
+                        <select name="result" id="result" onchange="this.form.submit()">
+                            <option value="">All Results</option>
+                            <option value="Normal" {% if filters.result == 'Normal' %}selected{% endif %}>Normal</option>
+                            <option value="Warning" {% if filters.result == 'Warning' %}selected{% endif %}>Warning</option>
+                            <option value="Injection" {% if filters.result == 'Injection' %}selected{% endif %}>Injection</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="search">Search</label>
+                        <input type="text" name="search" id="search" placeholder="Tool name or keywords..."
+                               value="{{ filters.search or '' }}">
+                    </div>
+
+                    <div class="filter-group">
+                        <label for="limit">Results per page</label>
+                        <select name="limit" id="limit" onchange="this.form.submit()">
+                            <option value="10" {% if pagination.limit == 10 %}selected{% endif %}>10</option>
+                            <option value="25" {% if pagination.limit == 25 %}selected{% endif %}>25</option>
+                            <option value="50" {% if pagination.limit == 50 %}selected{% endif %}>50</option>
+                            <option value="100" {% if pagination.limit == 100 %}selected{% endif %}>100</option>
+                            <option value="200" {% if pagination.limit == 200 %}selected{% endif %}>200</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <button type="submit" class="btn btn-primary" style="width: 100%;">Apply Filters</button>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>&nbsp;</label>
+                        <a href="/" class="btn btn-primary" style="width: 100%; text-align: center; background: #6c757d;">Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+
         <div class="results-section">
-            <h2>Detection Results</h2>
+            <h2>Detection Results
+                {% if pagination %}
+                <span style="font-size: 0.7em; color: #6c757d; font-weight: normal;">
+                    ({{ pagination.start_idx }}-{{ pagination.end_idx }} of {{ pagination.total_results }})
+                </span>
+                {% endif %}
+            </h2>
             
             {% if results %}
             <div class="table-container">
                 <table>
                     <thead>
                         <tr>
+                            <th style="width: 30px;"></th>
                             <th>Tool Name</th>
-                            <th>Description</th>
+                            <th>Detected Capabilities</th>
                             <th>Detection Result</th>
+                            <th>Severity</th>
                             <th>Risk Score</th>
                             <th>Timestamp</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for result in results %}
-                        <tr>
+                        <tr onclick="toggleDetails({{ loop.index0 }})" data-row-id="{{ loop.index0 }}">
+                            <td>
+                                <span class="expand-btn" id="expand-btn-{{ loop.index0 }}">▶</span>
+                            </td>
                             <td><strong>{{ result.tool_name }}</strong></td>
                             <td>
-                                <div class="description" title="{{ result.description }}">
-                                    {{ result.description }}
+                                <div id="desc-{{ loop.index0 }}">
+                                    {% if result.detected_patterns %}
+                                        {% for pattern in result.detected_patterns %}
+                                        <span class="capability-tag {{ pattern.capability_name }}">
+                                            {{ pattern.capability_name }}
+                                        </span>
+                                        {% endfor %}
+                                    {% else %}
+                                        <span style="color: #6c757d; font-style: italic; font-size: 0.9em;">No detections</span>
+                                    {% endif %}
                                 </div>
                             </td>
                             <td>
@@ -307,14 +702,78 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="risk-score 
+                                <span class="severity-badge severity-{{ result.severity }}">
+                                    {{ result.severity }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="risk-score
                                     {% if result.risk_score >= 30 %}score-high
                                     {% elif result.risk_score >= 15 %}score-medium
                                     {% else %}score-low{% endif %}">
-                                    {{ result.risk_score }}
+                                    {{ "%.2f"|format(result.risk_score) }}
                                 </span>
                             </td>
                             <td>{{ result.timestamp[:19] }}</td>
+                        </tr>
+                        <tr class="details-row" id="details-{{ loop.index0 }}">
+                            <td colspan="7">
+                                <div class="details-content">
+                                    {% if result.tool_content %}
+                                    <div class="original-description" style="border-left-color: #667eea;">
+                                        <h4>🔧 Tool Prompt / Description</h4>
+                                        <p>{{ result.tool_content }}</p>
+                                    </div>
+                                    {% endif %}
+
+                                    {% if result.description %}
+                                    <div class="original-description">
+                                        <h4>📝 Detection Summary</h4>
+                                        <p>{{ result.description }}</p>
+                                    </div>
+                                    {% endif %}
+
+                                    <h3 style="margin-bottom: 15px; color: #333;">Detected Patterns</h3>
+                                    {% if result.detected_patterns %}
+                                    <div class="patterns-grid">
+                                        {% for pattern in result.detected_patterns %}
+                                        <div class="pattern-card">
+                                            <div class="pattern-header">
+                                                <span class="capability-name">{{ pattern.capability_name }}</span>
+                                                <span class="category-badge category-{{ pattern.category }}">
+                                                    {{ pattern.category }}
+                                                </span>
+                                            </div>
+
+                                            <div class="confidence-bar">
+                                                <div class="confidence-label">
+                                                    Confidence: {{ "%.0f"|format(pattern.confidence * 100) }}%
+                                                </div>
+                                                <div class="confidence-progress">
+                                                    <div class="confidence-fill"
+                                                         style="width: {{ pattern.confidence * 100 }}%"></div>
+                                                </div>
+                                            </div>
+
+                                            <div class="keywords-container">
+                                                <div class="keywords-label">Evidence Keywords:</div>
+                                                {% for keyword in pattern.keywords %}
+                                                <span class="keyword-tag">{{ keyword }}</span>
+                                                {% endfor %}
+                                            </div>
+
+                                            <div class="score-info">
+                                                Score: {{ "%.2f"|format(pattern.score) }}
+                                                (weight: {{ "%.1f"|format(pattern.score_weight) }})
+                                            </div>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+                                    {% else %}
+                                    <p style="color: #6c757d; font-style: italic;">No patterns detected</p>
+                                    {% endif %}
+                                </div>
+                            </td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -329,14 +788,80 @@
                 <a href="/test" class="btn btn-primary">Test Your First Tool</a>
             </div>
             {% endif %}
+
+            {% if pagination %}
+            <div class="pagination">
+                <div class="pagination-info">
+                    Showing {{ pagination.start_idx }}-{{ pagination.end_idx }} of {{ pagination.total_results }} results
+                </div>
+                {% if pagination.total_pages > 1 %}
+                <div class="pagination-controls">
+                    <button class="pagination-btn" onclick="changePage({{ pagination.page - 1 }})"
+                            {% if not pagination.has_prev %}disabled{% endif %}>
+                        ← Previous
+                    </button>
+
+                    <div class="page-numbers">
+                        {% set start_page = [1, pagination.page - 2]|max %}
+                        {% set end_page = [pagination.total_pages, pagination.page + 2]|min %}
+
+                        {% if start_page > 1 %}
+                        <a href="#" onclick="changePage(1); return false;" class="page-num">1</a>
+                        {% if start_page > 2 %}
+                        <span style="padding: 8px;">...</span>
+                        {% endif %}
+                        {% endif %}
+
+                        {% for page_num in range(start_page, end_page + 1) %}
+                        <a href="#" onclick="changePage({{ page_num }}); return false;"
+                           class="page-num {% if page_num == pagination.page %}active{% endif %}">
+                            {{ page_num }}
+                        </a>
+                        {% endfor %}
+
+                        {% if end_page < pagination.total_pages %}
+                        {% if end_page < pagination.total_pages - 1 %}
+                        <span style="padding: 8px;">...</span>
+                        {% endif %}
+                        <a href="#" onclick="changePage({{ pagination.total_pages }}); return false;" class="page-num">
+                            {{ pagination.total_pages }}
+                        </a>
+                        {% endif %}
+                    </div>
+
+                    <button class="pagination-btn" onclick="changePage({{ pagination.page + 1 }})"
+                            {% if not pagination.has_next %}disabled{% endif %}>
+                        Next →
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
         </div>
-        
+
         <footer>
             <p>MCP Tool Detection System | Powered by Python & Flask</p>
         </footer>
     </div>
     
     <script>
+        function toggleDetails(rowId) {
+            const detailsRow = document.getElementById(`details-${rowId}`);
+            const expandBtn = document.getElementById(`expand-btn-${rowId}`);
+
+            // Toggle details row
+            detailsRow.classList.toggle('show');
+
+            // Toggle expand button
+            expandBtn.classList.toggle('expanded');
+        }
+
+        function changePage(page) {
+            const url = new URL(window.location.href);
+            url.searchParams.set('page', page);
+            window.location.href = url.toString();
+        }
+
         function clearResults() {
             if (confirm('Are you sure you want to clear all detection results?')) {
                 fetch('/clear', {

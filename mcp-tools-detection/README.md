@@ -2,25 +2,47 @@
 
 A comprehensive web application for detecting malicious patterns in Model Context Protocol (MCP) tool descriptions using rule-based analysis.
 
+## ⚡ NEW: Auto-Import Detection Results
+
+**Detection results are now automatically imported! No manual conversion needed.**
+
+```bash
+# 1. Run detection
+cd detection && python examples/run_mcptox_detection.py
+
+# 2. Start server (auto-imports results)
+cd ../mcp-tools-detection && python app.py
+# Output: ✓ Automatically imported 493 detection results
+
+# 3. View at http://localhost:3003 - Done!
+```
+
+See [QUICKSTART.md](QUICKSTART.md) for details.
+
 ## 🎯 Features
 
-1. **Web Interface** - Beautiful dashboard displaying detection results with three columns:
+1. **🔄 Auto-Import Integration** - Automatically loads detection module results on startup
+   - Incremental import (only new/modified results)
+   - Smart tracking with timestamps
+   - Zero manual configuration
+
+2. **Web Interface** - Beautiful dashboard displaying detection results with three columns:
    - Tool Name
-   - Description  
+   - Description
    - Detection Result (Normal/Warning/Injection with color coding)
 
-2. **REST API** - Accept tool name and description parameters for automated scanning
+3. **REST API** - Accept tool name and description parameters for automated scanning
 
-3. **Rule-Based Detection** - Process descriptions using configurable YAML rules:
+4. **Rule-Based Detection** - Process descriptions using configurable YAML rules:
    - File access patterns
    - Network activity indicators
    - Command execution keywords
    - Risk scoring system
    - Configurable thresholds
 
-4. **Flexible Storage** - JSON-based storage with easy database migration path
+5. **Flexible Storage** - JSON-based storage with easy database migration path
 
-5. **Statistics Dashboard** - Real-time metrics on detection results
+6. **Statistics Dashboard** - Real-time metrics on detection results
 
 ## 📋 Requirements
 

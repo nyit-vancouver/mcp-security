@@ -8,7 +8,7 @@ from pathlib import Path
 AUTO_IMPORT_ON_STARTUP = True
 
 # Path to detection module output directory
-DETECTION_OUTPUT_DIR = Path(__file__).parent.parent / "detection" / "examples" / "mcptox_samples"
+DETECTION_OUTPUT_DIR = Path(__file__).parent.parent / "detection" / "examples" / "benchmarks" / "mcptox"
 
 # Detection JSONL file name
 DETECTION_JSONL_FILENAME = "per_file_detection.jsonl"

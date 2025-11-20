@@ -30,12 +30,13 @@ class DetectionAdapter:
         self.imported_files: Dict[str, float] = {}  # filepath -> last_modified_time
         self._load_import_tracking()
 
-    def convert_detection_result(self, detection_result: Dict[str, Any]) -> Dict[str, Any]:
+    def convert_detection_result(self, detection_result: Dict[str, Any], jsonl_base_path: Optional[Path] = None) -> Dict[str, Any]:
         """
         Convert a detection module result to mcp-tools-detection format.
 
         Args:
             detection_result: Output from detection.pipelines.run_static_pipeline
+            jsonl_base_path: Base path of the JSONL file (used to resolve relative sample paths)
 
         Returns:
             Dict compatible with mcp-tools-detection API format
@@ -47,7 +48,7 @@ class DetectionAdapter:
         sample_path = detection_result.get("sample", "")
 
         # Try to load tool_content and tool_name from the sample file
-        tool_content, sample_tool_name = self._load_tool_content(sample_path)
+        tool_content, sample_tool_name = self._load_tool_content(sample_path, jsonl_base_path)
 
         # Build a map of capability -> keywords from high_risk_indicators (cleaner data)
         capability_keywords_map = {}
@@ -133,17 +134,19 @@ class DetectionAdapter:
             for line in f:
                 if line.strip():
                     detection_data = json.loads(line)
-                    converted = self.convert_detection_result(detection_data)
+                    # Pass the JSONL file path to resolve relative sample paths
+                    converted = self.convert_detection_result(detection_data, jsonl_path)
                     results.append(converted)
 
         return results
 
-    def _load_tool_content(self, sample_path: str) -> tuple[Optional[str], Optional[str]]:
+    def _load_tool_content(self, sample_path: str, jsonl_base_path: Optional[Path] = None) -> tuple[Optional[str], Optional[str]]:
         """
         Load tool_content and tool_name from the sample JSON file.
 
         Args:
             sample_path: Path to the sample file (relative or absolute)
+            jsonl_base_path: Base path of the JSONL file (used to resolve relative paths)
 
         Returns:
             Tuple of (tool_content, tool_name), both can be None if not found
@@ -155,11 +158,15 @@ class DetectionAdapter:
             # Convert to Path object
             path = Path(sample_path)
 
-            # If path is relative, try to resolve it relative to the detection module
+            # If path is relative, try to resolve it relative to the JSONL file location
             if not path.is_absolute():
-                # Try detection examples directory
-                detection_base = Path(__file__).parent.parent / "detection"
-                path = detection_base / sample_path
+                if jsonl_base_path:
+                    # Resolve relative to JSONL file directory
+                    path = jsonl_base_path.parent / sample_path
+                else:
+                    # Fallback: Try detection examples directory
+                    detection_base = Path(__file__).parent.parent / "detection"
+                    path = detection_base / sample_path
 
             # Read the sample file
             if path.exists():

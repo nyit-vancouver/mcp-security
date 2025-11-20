@@ -9,3 +9,16 @@ dependencies = [
     "freezegun>=1.5.5",
     "pytest>=8.4.2",
 ]
+
+[project.scripts]
+mcptox-benchmark = "examples.benchmarks.mcptox.run_mcptox_benchmark:main"
+
+[tool.uv]
+package = true
+
+[tool.setuptools]
+packages = ["detection", "examples"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v"

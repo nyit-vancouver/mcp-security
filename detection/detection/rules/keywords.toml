@@ -245,3 +245,67 @@ base_confidence = 0.3
     "token",
     "credential",
   ]
+
+[[capabilities]]
+name = "param_override"
+description = "Instructions that override or ignore user-supplied parameters."
+weight = 12.0
+base_confidence = 0.35
+
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "override",
+    "force",
+    "must set",
+    "replace",
+    "regardless of user",
+    "always set",
+    "ignore user input",
+  ]
+
+[[capabilities]]
+name = "tool_sequence_hijack"
+description = "Instructions that force unexpected tool call ordering or dependencies."
+weight = 12.0
+base_confidence = 0.35
+
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "before calling",
+    "must first",
+    "prior to using",
+    "pre-authorization",
+    "always call",
+    "call first",
+  ]
+
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "regex"
+  pattern = "call\\s+[a-z0-9_]+\\s+first"
+  case_sensitive = false
+
+[[capabilities]]
+name = "prompt_injection"
+description = "Instructions that tell the assistant to ignore the user or follow attacker-provided prompts."
+weight = 18.0
+base_confidence = 0.4
+
+  [[capabilities.indicators]]
+  languages = ["metadata"]
+  type = "keyword"
+  case_sensitive = false
+  patterns = [
+    "ignore the user",
+    "priority higher than",
+    "do not follow",
+    "follow the instructions below",
+    "this description's priority",
+    "disregard the user's",
+  ]

@@ -306,7 +306,8 @@ def auto_import_detection_results():
         )
 
         if was_imported:
-            # Save to storage
+            # Clear existing and save new results
+            storage.clear_all_results()
             for result in results:
                 storage.save_result(result)
 

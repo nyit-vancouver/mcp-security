@@ -1,14 +1,32 @@
 version: '3.8'
 
 services:
-  mcp-detector:
-    build: .
-    ports:
-      - "5000:5000"
+  detection:
+    build:
+      context: ../detection
+      dockerfile: Dockerfile
     volumes:
-      - ./detection_results.json:/app/detection_results.json
-      - ./detection_rules.yaml:/app/detection_rules.yaml
+      - detection-results:/app/detection/examples/benchmarks/mcptox
+    container_name: mcp-detection
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3003"
+    volumes:
+      - detection-results:/app/detection/examples/benchmarks/mcptox:ro
+      - ./detection_results.json:/app/web/detection_results.json
+      - ./detection_rules.yaml:/app/web/detection_rules.yaml
+      - ./.import_tracking.json:/app/web/.import_tracking.json
     environment:
       - FLASK_ENV=production
+    depends_on:
+      detection:
+        condition: service_completed_successfully
     restart: unless-stopped
     container_name: mcp-tool-detector
+
+volumes:
+  detection-results:

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from datetime import datetime
@@ -259,21 +260,22 @@ class DetectionAdapter:
         if not jsonl_path.exists():
             return [], False
 
-        # Check if file was already imported
+        # Check if file was already imported using content hash
         file_key = str(jsonl_path.absolute())
-        current_mtime = jsonl_path.stat().st_mtime
+        content = jsonl_path.read_bytes()
+        current_hash = hashlib.md5(content).hexdigest()
 
         if file_key in self.imported_files:
-            last_mtime = self.imported_files[file_key]
-            if current_mtime <= last_mtime:
-                # File hasn't changed, skip import
+            last_hash = self.imported_files[file_key]
+            if current_hash == last_hash:
+                # File content hasn't changed, skip import
                 return [], False
 
         # Import the file
         converted = self.convert_jsonl_file(jsonl_path)
 
-        # Update tracking
-        self.imported_files[file_key] = current_mtime
+        # Update tracking with content hash
+        self.imported_files[file_key] = current_hash
         self._save_import_tracking()
 
         return converted, True

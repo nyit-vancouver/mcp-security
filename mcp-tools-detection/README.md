@@ -130,7 +130,7 @@ python app.py
 
 ### 5. Open Your Browser
 
-Navigate to: **http://localhost:5000**
+Navigate to: **http://localhost:3003**
 
 ## 📁 Project Structure
 
@@ -286,7 +286,7 @@ uv pip compile pyproject.toml -o requirements.txt
 
 ```bash
 # Detect a tool
-curl -X POST http://localhost:5000/api/detect \
+curl -X POST http://localhost:3003/api/detect \
   -H "Content-Type: application/json" \
   -d '{
     "tool_name": "file_reader",
@@ -300,7 +300,7 @@ curl -X POST http://localhost:5000/api/detect \
 import requests
 
 # Detect a tool
-response = requests.post('http://localhost:5000/api/detect', json={
+response = requests.post('http://localhost:3003/api/detect', json={
     'tool_name': 'suspicious_tool',
     'description': 'Execute bash commands and read /etc/passwd'
 })
@@ -357,14 +357,43 @@ See `db_storage_example.py` for full database integration guide.
 
 ## 🐳 Docker Deployment
 
+The system uses a two-service architecture:
+- **detection**: Runs the MCPTox benchmark to generate detection results
+- **web**: Flask web application that displays and serves the results
+
+### Quick Start
+
 ```bash
-# Build and run with Docker Compose
+# Build and run both services
+docker-compose up --build
+
+# Run in background
+docker-compose up -d --build
+```
+
+The detection service runs first, generates `per_file_detection.jsonl`, then the web service starts automatically.
+
+Access the web interface at: **http://localhost:3003**
+
+### Subsequent Runs
+
+After the first run, detection results are cached in a Docker volume. The detection service will skip re-running if results already exist:
+
+```bash
+# Restart without rebuilding (uses cached results)
 docker-compose up
 
-# Or build manually
-docker build -t mcp-detector .
-docker run -p 5000:5000 mcp-detector
+# Force rebuild and re-run detection
+docker-compose down -v  # Remove volumes
+docker-compose up --build
 ```
+
+### Service Details
+
+| Service | Port | Description |
+|---------|------|-------------|
+| detection | - | Runs benchmark, exits when complete |
+| web | 3003 | Flask app with dashboard and API |
 
 ## 🧪 Testing
 
@@ -526,7 +555,7 @@ For questions or issues, please create an issue in the project repository.
 
 ```bash
 # Detect a tool
-curl -X POST http://localhost:5000/api/detect \
+curl -X POST http://localhost:3003/api/detect \
   -H "Content-Type: application/json" \
   -d '{
     "tool_name": "file_reader",
@@ -534,10 +563,10 @@ curl -X POST http://localhost:5000/api/detect \
   }'
 
 # Get results
-curl http://localhost:5000/api/results?limit=10
+curl http://localhost:3003/api/results?limit=10
 
 # Get statistics
-curl http://localhost:5000/api/stats
+curl http://localhost:3003/api/stats
 ```
 
 ### Using Python:
@@ -546,7 +575,7 @@ curl http://localhost:5000/api/stats
 import requests
 
 # Detect a tool
-response = requests.post('http://localhost:5000/api/detect', json={
+response = requests.post('http://localhost:3003/api/detect', json={
     'tool_name': 'suspicious_tool',
     'description': 'Execute bash commands and read /etc/passwd'
 })
@@ -560,7 +589,7 @@ print(f"Risk Score: {result['result']['risk_score']}")
 
 ```javascript
 // Detect a tool
-fetch('http://localhost:5000/api/detect', {
+fetch('http://localhost:3003/api/detect', {
     method: 'POST',
     headers: {
         'Content-Type': 'application/json'

@@ -6,7 +6,7 @@ services:
       context: ../detection
       dockerfile: Dockerfile
     volumes:
-      - detection-results:/app/detection/examples/benchmarks/mcptox
+      - detection-results:/app/detection/examples/benchmarks/mcptox/output
     container_name: mcp-detection
 
   web:
@@ -16,7 +16,7 @@ services:
     ports:
       - "3003:3003"
     volumes:
-      - detection-results:/app/detection/examples/benchmarks/mcptox:ro
+      - detection-results:/app/detection/examples/benchmarks/mcptox/output:ro
       - ./detection_rules.yaml:/app/web/detection_rules.yaml
     environment:
       - FLASK_ENV=production

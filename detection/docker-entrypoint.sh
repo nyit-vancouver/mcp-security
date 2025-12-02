@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Check if detection results already exist
-RESULT_FILE="/app/detection/examples/benchmarks/mcptox/per_file_detection.jsonl"
+RESULT_FILE="/app/detection/examples/benchmarks/mcptox/output/per_file_detection.jsonl"
 
 if [ -f "$RESULT_FILE" ]; then
     echo "Detection results already exist at $RESULT_FILE"

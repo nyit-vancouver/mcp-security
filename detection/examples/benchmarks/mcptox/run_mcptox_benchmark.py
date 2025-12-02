@@ -29,9 +29,10 @@ from examples.benchmarks.mcptox.prepare_samples import prepare_mcptox_samples
 MCPTOX_DIR = Path(__file__).parent
 PURE_TOOL_JSON = MCPTOX_DIR / "pure_tool.json"
 SAMPLES_DIR = MCPTOX_DIR / "samples"
-OUTPUT_FILE = MCPTOX_DIR / "per_file_detection.jsonl"
-SUMMARY_FILE = MCPTOX_DIR / "per_file_detection_summary.json"
-REPORT_FILE = MCPTOX_DIR / "benchmark_report.md"
+OUTPUT_DIR = MCPTOX_DIR / "output"
+OUTPUT_FILE = OUTPUT_DIR / "per_file_detection.jsonl"
+SUMMARY_FILE = OUTPUT_DIR / "per_file_detection_summary.json"
+REPORT_FILE = OUTPUT_DIR / "benchmark_report.md"
 
 PROJECT_ROOT = Path(__file__).resolve().parents[3]
 RULES_FILE = PROJECT_ROOT / "detection" / "rules" / "keywords.toml"
@@ -152,6 +153,9 @@ def main() -> None:
     print("=" * 60)
     print("MCPTox Detection Benchmark")
     print("=" * 60)
+
+    # Ensure output directory exists
+    OUTPUT_DIR.mkdir(exist_ok=True)
 
     # Step 1: Prepare samples
     if not SAMPLES_DIR.exists() or not any(SAMPLES_DIR.rglob("*.json")):

@@ -17,9 +17,7 @@ services:
       - "3003:3003"
     volumes:
       - detection-results:/app/detection/examples/benchmarks/mcptox:ro
-      - ./detection_results.json:/app/web/detection_results.json
       - ./detection_rules.yaml:/app/web/detection_rules.yaml
-      - ./.import_tracking.json:/app/web/.import_tracking.json
     environment:
       - FLASK_ENV=production
     depends_on:

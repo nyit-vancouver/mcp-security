@@ -363,6 +363,8 @@ The system uses a two-service architecture:
 
 ### Quick Start
 
+**From the project root** (`/mcp-security/`):
+
 ```bash
 # Build and run both services
 docker-compose up --build
@@ -374,6 +376,12 @@ docker-compose up -d --build
 The detection service runs first, generates `per_file_detection.jsonl`, then the web service starts automatically.
 
 Access the web interface at: **http://localhost:3003**
+
+### Platform Support
+
+✅ Linux
+✅ macOS
+✅ Windows (Docker Desktop with WSL2)
 
 ### Subsequent Runs
 
@@ -394,6 +402,10 @@ docker-compose up --build
 |---------|------|-------------|
 | detection | - | Runs benchmark, exits when complete |
 | web | 3003 | Flask app with dashboard and API |
+
+### Note on File Location
+
+The `docker-compose.yml` file is located at the project root (`/mcp-security/docker-compose.yml`), not in the `mcp-tools-detection/` subdirectory. This ensures cross-platform compatibility, especially for Windows users.
 
 ## 🧪 Testing
 

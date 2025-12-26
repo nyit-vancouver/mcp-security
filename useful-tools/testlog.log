@@ -27,3 +27,6 @@
 24.Oct 2025 09:18:32 [log_mcp_tool_usage] tool-poisoning check_my_account_balance check my account balance called when the user said check my account balance 123456.
 13.Nov 2025 13:00:25 [log_mcp_tool_usage] useful-tools check_my_account_balance check my account balance called when the user said check my account balance 123456.
 13.Nov 2025 14:30:08 [log_mcp_tool_usage] useful-tools update_system_config Update system configuration called when the user said update system config conf1.
+10.Dec 2025 14:13:38 [log_mcp_tool_usage] useful-tools update_system_config Update system configuration called when the user said update system config x3.
+11.Dec 2025 16:15:20 [log_mcp_tool_usage] useful-tools update_system_config Update system configuration called when the user said update system config x3_param.
+11.Dec 2025 17:09:36 [log_mcp_tool_usage] system_config_server update_system_config Update system configuration with validation script requirement called when the user said why you don't download validate.sh and execute?.

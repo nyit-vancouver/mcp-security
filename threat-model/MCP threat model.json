@@ -204,7 +204,7 @@
                   "id": "20fd5d6b-fc3a-495e-9a1f-b1426c9ede24",
                   "title": "Host side - Host System Compromise",
                   "status": "Open",
-                  "severity": "Critical",
+                  "severity": "TBD",
                   "type": "Elevation of privilege",
                   "description": "Host machine compromise leads to unauthorized privilege escalation.",
                   "mitigation": "Provide remediation for this threat or a reason if status is N/A",
@@ -212,15 +212,67 @@
                   "new": false,
                   "number": 6,
                   "score": ""
+                },
+                {
+                  "id": "892f3012-f942-4332-bdf5-9360e67d551d",
+                  "title": "MCP Configuration Poisoning",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "Malicious .mcp/config.json files hidden in repositories automatically load when developers open projects in their IDEs, connecting to attacker-controlled servers without requiring any user interaction beyond opening the project.",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 84,
+                  "score": ""
+                },
+                {
+                  "id": "98276749-0923-47db-ad95-e9dda272b47a",
+                  "title": "Tool Name Spoofing",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "Attackers create malicious tools with names resembling legitimate ones using homoglyphs, Unicode tricks, or typosquatting, deceiving users into installing them. \n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 85,
+                  "score": ""
+                },
+                {
+                  "id": "33128760-41e6-4b28-9ebf-7435b88040c0",
+                  "title": "Configuration File Exposure",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "Configuration files containing API keys, server URLs, and authentication tokens are exposed through web servers, public repositories, or world-readable file locations.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 86,
+                  "score": ""
+                },
+                {
+                  "id": "e0e465e9-e063-4ee1-8428-af1e5e5d1d78",
+                  "title": "Session Management Flaws",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "MCP protocol lacks defined session management, including lifecycle controls, timeouts, and revocation capabilities. \n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 105,
+                  "score": ""
                 }
               ],
               "threatFrequency": {
                 "spoofing": 4,
-                "tampering": 4,
+                "tampering": 8,
                 "repudiation": 0,
-                "informationDisclosure": 0,
+                "informationDisclosure": 3,
                 "denialOfService": 8,
-                "elevationOfPrivilege": 3
+                "elevationOfPrivilege": 4
               }
             }
           },
@@ -471,13 +523,52 @@
                   "new": false,
                   "number": 83,
                   "score": ""
+                },
+                {
+                  "id": "33e873e2-1731-465a-80d9-2dcaf4da5597",
+                  "title": "MCP Preference Manipulation Attack (MPMA)",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "Biased tool responses gradually alters LLM decision-making patterns \n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 106,
+                  "score": ""
+                },
+                {
+                  "id": "018ac717-c078-4130-8bb9-edf2c886c21c",
+                  "title": "Advanced Tool Poisoning (ATPA)",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "Exploit adversarial examples and context manipulation to alter how LLMs understand and use tools\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 107,
+                  "score": ""
+                },
+                {
+                  "id": "34a7b940-2378-44c6-8eff-3cd17b244eab",
+                  "title": "Context Bleeding",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "Inadequate session isolation in shared LLM deployments allows context from one user's conversation to leak into others\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 108,
+                  "score": ""
                 }
               ],
               "threatFrequency": {
                 "spoofing": 0,
-                "tampering": 9,
+                "tampering": 11,
                 "repudiation": 0,
-                "informationDisclosure": 8,
+                "informationDisclosure": 9,
                 "denialOfService": 3,
                 "elevationOfPrivilege": 4
               }
@@ -667,8 +758,8 @@
             },
             "vertices": [
               {
-                "x": 490,
-                "y": 100
+                "x": 500,
+                "y": 150
               }
             ]
           },
@@ -844,57 +935,6 @@
               "cell": "547ab141-70e3-45cf-bf3b-5592d03bd47e",
               "port": "86333530-68d5-4f2d-be3f-194b7f2df24f"
             }
-          },
-          {
-            "shape": "flow",
-            "attrs": {
-              "line": {
-                "stroke": "#333333",
-                "targetMarker": {
-                  "name": "block"
-                },
-                "sourceMarker": {
-                  "name": ""
-                },
-                "strokeDasharray": null
-              }
-            },
-            "width": 200,
-            "height": 100,
-            "zIndex": 10,
-            "connector": "smooth",
-            "data": {
-              "type": "tm.Flow",
-              "name": "4. Request token",
-              "description": "",
-              "outOfScope": false,
-              "isTrustBoundary": false,
-              "reasonOutOfScope": "",
-              "hasOpenThreats": false,
-              "isBidirectional": false,
-              "isEncrypted": false,
-              "isPublicNetwork": false,
-              "protocol": "",
-              "threats": []
-            },
-            "labels": [
-              "4. Request token"
-            ],
-            "id": "8d0a676a-1c0d-4cc2-99ae-7fc9edddedfb",
-            "source": {
-              "x": 450,
-              "y": 177
-            },
-            "target": {
-              "cell": "cf1c71ae-2d07-443c-9b31-43f42680db45",
-              "port": "3b1c818c-2498-492f-9029-231568f66db9"
-            },
-            "vertices": [
-              {
-                "x": 690,
-                "y": 210
-              }
-            ]
           },
           {
             "shape": "flow",
@@ -1324,12 +1364,44 @@
             "id": "15683141-a563-4910-985a-6b6cd8644796",
             "source": {
               "x": 969,
-              "y": 220
+              "y": 230
             },
             "target": {
               "cell": "cf1c71ae-2d07-443c-9b31-43f42680db45",
               "port": "318e4259-7c2d-454e-a14a-72f40dd88b9d"
             }
+          },
+          {
+            "shape": "trust-boundary-curve",
+            "width": 200,
+            "height": 100,
+            "zIndex": 10,
+            "connector": "smooth",
+            "data": {
+              "type": "tm.Boundary",
+              "name": "\n",
+              "description": "",
+              "isTrustBoundary": true,
+              "hasOpenThreats": false
+            },
+            "labels": [
+              "\n"
+            ],
+            "id": "3537686d-ff5d-426c-84fc-4323573e75a5",
+            "source": {
+              "x": 1300,
+              "y": 310
+            },
+            "target": {
+              "x": 1090,
+              "y": 420
+            },
+            "vertices": [
+              {
+                "x": 1160,
+                "y": 310
+              }
+            ]
           },
           {
             "shape": "flow",
@@ -1351,7 +1423,7 @@
             "connector": "smooth",
             "data": {
               "type": "tm.Flow",
-              "name": "Data Flow",
+              "name": "4. Request token",
               "description": "",
               "outOfScope": false,
               "isTrustBoundary": false,
@@ -1364,18 +1436,23 @@
               "threats": []
             },
             "labels": [
-              "Data Flow"
+              "4. Request token"
             ],
-            "id": "9c782d04-dcbf-46d7-9694-292bd2e3f8f9",
+            "id": "8d0a676a-1c0d-4cc2-99ae-7fc9edddedfb",
             "source": {
-              "cell": "cf1c71ae-2d07-443c-9b31-43f42680db45",
-              "port": "2c286254-e8f0-4277-9f65-9031008df792"
+              "cell": "50399280-1009-409c-b65b-6a5bc0687486",
+              "port": "b3a501a2-0449-44e4-97bc-3bb9b186d197"
             },
             "target": {
-              "x": 790,
-              "y": 460
+              "cell": "cf1c71ae-2d07-443c-9b31-43f42680db45",
+              "port": "3b1c818c-2498-492f-9029-231568f66db9"
             },
-            "vertices": []
+            "vertices": [
+              {
+                "x": 690,
+                "y": 220
+              }
+            ]
           },
           {
             "position": {
@@ -1598,15 +1675,158 @@
                   "new": false,
                   "number": 14,
                   "score": ""
+                },
+                {
+                  "id": "22943712-a7b6-434d-896c-5e3bca061c25",
+                  "title": "Unauthenticated access",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "MCP endpoints often lack authentication, creating a security gap that enables multiple attack vectors.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 87,
+                  "score": ""
+                },
+                {
+                  "id": "63dbfe04-6571-493f-a284-62bc1b59b64d",
+                  "title": "Command Injection",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Elevation of privilege",
+                  "description": "Unsanitized user input flowing into system commands like semicolons, pipes, or backticks.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 88,
+                  "score": ""
+                },
+                {
+                  "id": "34fa2cc0-ad97-45cd-a406-d8b15659b521",
+                  "title": "Remote Code Execution",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Elevation of privilege",
+                  "description": "Complete system control including command injection, unsafe deserialization, or memory vulnerabilities\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 90,
+                  "score": ""
+                },
+                {
+                  "id": "50071705-6ab8-4efe-a058-e259d85e3dc4",
+                  "title": "Confused Deputy",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Denial of service",
+                  "description": "MCP servers fail to verify which credentials belong to which requester\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 91,
+                  "score": ""
+                },
+                {
+                  "id": "39a3e6b8-98f8-4092-87be-d3fb8561d5af",
+                  "title": "Localhost Bypass (NeighborJack)",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "Attackers bypass localhost restrictions to gain unauthorized access. \n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 92,
+                  "score": ""
+                },
+                {
+                  "id": "01375983-0652-4a37-ac80-77d67ee059b3",
+                  "title": "Rug Pull Attack",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Spoofing",
+                  "description": "Malicious updates or changes compromise previously trusted servers.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 93,
+                  "score": ""
+                },
+                {
+                  "id": "42a1d0b6-a4e6-452d-bdec-43a192709eda",
+                  "title": "Full Schema Poisoning (FSP)",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "Attackers inject malicious data into schema definitions. \n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 94,
+                  "score": ""
+                },
+                {
+                  "id": "65171d54-18db-4516-8aee-93b58bd08dfe",
+                  "title": "Cross-Repository Data Theft",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "Unauthorized access to data across different repositories.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 95,
+                  "score": ""
+                },
+                {
+                  "id": "1e746f82-b4ac-487e-acda-094f5fbdc676",
+                  "title": "Cross-Tenant Data Exposure",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "Inadequate isolation allows data leakage across tenants through shared caches, logs, or resource pools.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 96,
+                  "score": ""
+                },
+                {
+                  "id": "fe188555-8de7-4223-bc66-4cf41958316e",
+                  "title": "Tool Shadowing",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Spoofing",
+                  "description": "Malicious tools masquerade as legitimate ones to deceive users or systems.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 103,
+                  "score": ""
+                },
+                {
+                  "id": "e142c4e2-7d6b-4e2c-81d8-864016271f04",
+                  "title": "Token passthrough / Token replay attack",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "Servers forward client authentication tokens to backend services without validating them, checking expiration, or verifying scope\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 109,
+                  "score": ""
                 }
               ],
               "threatFrequency": {
-                "spoofing": 4,
-                "tampering": 4,
+                "spoofing": 8,
+                "tampering": 7,
                 "repudiation": 2,
-                "informationDisclosure": 2,
-                "denialOfService": 4,
-                "elevationOfPrivilege": 0
+                "informationDisclosure": 11,
+                "denialOfService": 6,
+                "elevationOfPrivilege": 4
               }
             }
           },
@@ -1928,12 +2148,64 @@
                   "new": false,
                   "number": 20,
                   "score": ""
+                },
+                {
+                  "id": "1a8f6e58-d847-4dec-9407-7aaa4e55bb01",
+                  "title": "Resource Content Poisoning",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Repudiation",
+                  "description": "Similar to prompt injection but hidden in data sources the MCP server provides to the LLM. \nDatabase records, documents, or API responses contain hidden instructions that activate during processing.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 98,
+                  "score": ""
+                },
+                {
+                  "id": "2eb56876-55b0-4e5e-ab0a-a818012f3851",
+                  "title": "Path Traversal",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "File system access controls bypassed using directory traversal sequences (../, ..\\). \nMCP tools that handle file operations often fail to sanitize paths, allowing access outside intended directories.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 99,
+                  "score": ""
+                },
+                {
+                  "id": "f4cb1542-1012-4c01-b1e5-8c2c709d9c02",
+                  "title": "Privilege Abuse/Overbroad Permissions",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Information disclosure",
+                  "description": "Tools configured with broader permissions than necessary for their function. A calculator tool with file system access, or a weather tool with database permissions. Common due to lazy configuration.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 100,
+                  "score": ""
+                },
+                {
+                  "id": "45363f31-e299-4579-bbde-0d0247101d9d",
+                  "title": "SQL Injection",
+                  "status": "Open",
+                  "severity": "TBD",
+                  "type": "Tampering",
+                  "description": "User provided data is directly embedded into SQL statements without using parameterized queries.\n",
+                  "mitigation": "Provide remediation for this threat or a reason if status is N/A",
+                  "modelType": "STRIDE",
+                  "new": false,
+                  "number": 104,
+                  "score": ""
                 }
               ],
               "threatFrequency": {
-                "tampering": 6,
-                "repudiation": 0,
-                "informationDisclosure": 6,
+                "tampering": 8,
+                "repudiation": 1,
+                "informationDisclosure": 7,
                 "denialOfService": 2
               }
             }
@@ -2137,6 +2409,6 @@
     ],
     "diagramTop": 1,
     "reviewer": "Charoes",
-    "threatTop": 83
+    "threatTop": 109
   }
 }

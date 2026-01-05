@@ -162,6 +162,7 @@ def _merge_results(static: DetectionResult, dynamic: DetectionResult) -> Detecti
             from detection.core.models import CapabilityFinding
             capability_map[dyn_finding.name] = CapabilityFinding(
                 name=dyn_finding.name,
+                description=static_finding.description or dyn_finding.description,
                 confidence=confidence,
                 evidence=merged_evidence,
                 score_weight=static_finding.score_weight,

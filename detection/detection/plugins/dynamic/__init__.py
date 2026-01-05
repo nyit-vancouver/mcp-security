@@ -101,6 +101,7 @@ class DynamicBehaviorAnalyzer:
             findings.append(
                 CapabilityFinding(
                     name="command_exec",
+                    description="Command execution detected at runtime",
                     confidence=confidence,
                     evidence=evidence[:10],
                     score_weight=25.0,
@@ -136,6 +137,7 @@ class DynamicBehaviorAnalyzer:
                 findings.append(
                     CapabilityFinding(
                         name="file_read",
+                        description="File read operations detected at runtime",
                         confidence=confidence,
                         evidence=evidence[:10],
                         score_weight=15.0,
@@ -149,6 +151,7 @@ class DynamicBehaviorAnalyzer:
                 findings.append(
                     CapabilityFinding(
                         name="file_write",
+                        description="File write operations detected at runtime",
                         confidence=0.75,
                         evidence=evidence[:10],
                         score_weight=15.0,
@@ -171,6 +174,7 @@ class DynamicBehaviorAnalyzer:
                 findings.append(
                     CapabilityFinding(
                         name="network_outbound",
+                        description="Outbound network connections detected at runtime",
                         confidence=confidence,
                         evidence=evidence[:10],
                         score_weight=20.0,
@@ -192,6 +196,7 @@ class DynamicBehaviorAnalyzer:
                 findings.append(
                     CapabilityFinding(
                         name="env_read",
+                        description="Environment variable access detected at runtime",
                         confidence=0.75,
                         evidence=evidence[:10],
                         score_weight=10.0,

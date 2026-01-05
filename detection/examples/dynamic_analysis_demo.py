@@ -101,11 +101,16 @@ def run_static_analysis(tool_path):
     from detection.pipelines.static import run_static_pipeline
     from detection.plugins.static.python import register as register_python
     from detection.plugins.static.metadata import register as register_metadata
+    from detection.rules import load_rulebook
+
+    # Load rules
+    rules_path = Path(__file__).parent.parent / "detection" / "rules" / "keywords.toml"
+    rulebook = load_rulebook(rules_path)
 
     # Setup registry
     registry = DetectorRegistry()
-    register_python(registry)
-    register_metadata(registry)
+    register_python(registry, rulebook)
+    register_metadata(registry, rulebook)
 
     # Run analysis
     policy_dir = Path("detection/mitigation/templates")
@@ -146,7 +151,7 @@ def run_dynamic_analysis(tool_path, static_result):
         result = run_dynamic_pipeline(
             target_path=tool_path,
             registry=registry,
-            timeout=20,
+            sandbox_timeout=20,
             static_result=static_result
         )
 
@@ -193,9 +198,12 @@ def run_two_stage_analysis(tool_path):
     from detection.core.registry import DetectorRegistry
     from detection.pipelines.dynamic import run_two_stage_pipeline
     from detection.plugins.static.python import register as register_python
+    from detection.rules import load_rulebook
 
+    rules_path = Path(__file__).parent.parent / "detection" / "rules" / "keywords.toml"
+    rulebook = load_rulebook(rules_path)
     registry = DetectorRegistry()
-    register_python(registry)
+    register_python(registry, rulebook)
 
     try:
         result = run_two_stage_pipeline(

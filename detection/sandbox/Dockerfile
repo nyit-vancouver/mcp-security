@@ -53,9 +53,11 @@ RUN add-apt-repository ppa:deadsnakes/ppa && \
 # Set Python 3.13 as default
 RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1
 
-# Install Python packages
+# Upgrade pip
+RUN python3 -m pip install --upgrade pip
+
+# Install Python packages (bcc is already available via python3-bpfcc system package)
 RUN pip3 install --no-cache-dir \
-    bcc \
     docker \
     psutil
 

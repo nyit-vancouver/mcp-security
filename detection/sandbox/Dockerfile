@@ -40,23 +40,13 @@ RUN apt-get update && apt-get install -y \
     psmisc \
     && rm -rf /var/lib/apt/lists/*
 
-# Install Python 3.13 from deadsnakes PPA
-RUN add-apt-repository ppa:deadsnakes/ppa && \
-    apt-get update && \
-    apt-get install -y \
-    python3.13 \
-    python3.13-dev \
-    python3.13-venv \
+# Use system Python 3 and install additional packages
+RUN apt-get update && apt-get install -y \
     python3-pip \
+    python3-setuptools \
     && rm -rf /var/lib/apt/lists/*
 
-# Set Python 3.13 as default
-RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.13 1
-
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip
-
-# Install Python packages (bcc is already available via python3-bpfcc system package)
+# Install Python packages
 RUN pip3 install --no-cache-dir \
     docker \
     psutil

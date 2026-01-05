@@ -47,9 +47,18 @@ def run_dynamic_pipeline(
     analyzer = DynamicBehaviorAnalyzer()
     findings = analyzer.analyze(sandbox_result.logs, target_path)
     
-    # Create session to calculate scores
-    session = DetectionSession(target_path)
-    session.findings = findings
+    # Calculate total score
+    total_score = sum(f.confidence * f.score_weight for f in findings)
+    
+    # Determine risk level
+    if total_score >= 70:
+        risk_level = "critical"
+    elif total_score >= 50:
+        risk_level = "high"
+    elif total_score >= 30:
+        risk_level = "medium"
+    else:
+        risk_level = "low"
     
     # Add telemetry notes
     telemetry = sandbox_result.telemetry
@@ -74,6 +83,8 @@ Captured events: {telemetry.get('total_events', 0)}
     result = DetectionResult(
         server_name=target_path.name,
         findings=findings,
+        total_score=total_score,
+        risk_level=risk_level,
         mitigations=[],
         notes=notes.strip()
     )
@@ -161,10 +172,23 @@ def _merge_results(static: DetectionResult, dynamic: DetectionResult) -> Detecti
     
     # Create merged result
     merged_findings = list(capability_map.values())
+    total_score = sum(f.confidence * f.score_weight for f in merged_findings)
+    
+    # Determine risk level
+    if total_score >= 70:
+        risk_level = "critical"
+    elif total_score >= 50:
+        risk_level = "high"
+    elif total_score >= 30:
+        risk_level = "medium"
+    else:
+        risk_level = "low"
     
     return DetectionResult(
         server_name=static.server_name,
         findings=merged_findings,
+        total_score=total_score,
+        risk_level=risk_level,
         mitigations=static.mitigations,
         notes=f"{static.notes}\n\n{dynamic.notes}".strip(),
     )

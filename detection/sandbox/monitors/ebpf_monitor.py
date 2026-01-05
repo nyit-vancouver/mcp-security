@@ -133,6 +133,15 @@ class eBPFMonitor:
     """eBPF-based behavior monitor"""
 
     def __init__(self, bpf_program_path="/monitor/bpf_programs.c"):
+        # Rename process to allow filtering in BPF
+        try:
+            import ctypes
+            libc = ctypes.cdll.LoadLibrary('libc.so.6')
+            # PR_SET_NAME = 15
+            libc.prctl(15, b"ebpf-monitor", 0, 0, 0)
+        except Exception as e:
+            print(f"[!] Failed to rename process: {e}", file=sys.stderr)
+
         self.logger = CEFLogger()
         self.start_time = time.time()
 
@@ -143,6 +152,9 @@ class eBPFMonitor:
 
         self.bpf = BPF(text=bpf_code)
 
+        # Ignore own PID to prevent recursive logging loops
+        self._ignore_pid(os.getpid())
+
         # Attach probes
         self._attach_probes()
 
@@ -150,6 +162,15 @@ class eBPFMonitor:
         self.bpf["events"].open_perf_buffer(self._handle_event)
 
         print("[*] eBPF monitor started. Capturing events...", file=sys.stderr)
+
+    def _ignore_pid(self, pid):
+        """Add PID to ignored list"""
+        try:
+            ignored_pids = self.bpf.get_table("ignored_pids")
+            ignored_pids[c_uint32(pid)] = c_uint8(1)
+            print(f"[*] Ignoring events from PID {pid}", file=sys.stderr)
+        except Exception as e:
+            print(f"[!] Failed to ignore PID {pid}: {e}", file=sys.stderr)
 
     def _attach_probes(self):
         """Attach eBPF probes to system calls using tracepoints"""
@@ -194,10 +215,17 @@ class eBPFMonitor:
         # Network events
         elif event_type in ["NET_SOCKET", "NET_CONNECT", "NET_SEND", "NET_RECV"]:
             if event_type == "NET_CONNECT":
-                ip_str = self._format_ip(event.ip, event.addr_family)
-                extensions["dst"] = f"{ip_str}:{event.port}"
-                extensions["dpt"] = str(event.port)
-                extensions["proto"] = "tcp" if event.addr_family == 2 else "udp"
+                if event.addr_family == 1:  # AF_UNIX
+                    extensions["dst"] = path
+                    extensions["proto"] = "unix"
+                else:
+                    ip_str = self._format_ip(event.ip, event.addr_family)
+                    extensions["dst"] = f"{ip_str}:{event.port}"
+                    extensions["dpt"] = str(event.port)
+                    extensions["proto"] = "tcp" if event.addr_family == 2 else "udp"
+                
+                extensions["cs1"] = str(event.addr_family)
+                extensions["cs1Label"] = "Family"
 
             elif event_type in ["NET_SEND", "NET_RECV"]:
                 extensions["bytesOut" if event_type == "NET_SEND" else "bytesIn"] = str(event.size)

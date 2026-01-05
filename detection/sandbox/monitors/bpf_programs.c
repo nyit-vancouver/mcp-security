@@ -83,12 +83,24 @@ static inline u64 get_curr_tid() {
     return bpf_get_current_pid_tgid();
 }
 
+static inline bool is_ignored() {
+    char comm[TASK_COMM_LEN];
+    bpf_get_current_comm(&comm, sizeof(comm));
+    // Check for "ebpf-monitor"
+    // We check enough characters to be reasonably sure
+    if (comm[0] == 'e' && comm[1] == 'b' && comm[2] == 'p' && comm[3] == 'f' && 
+        comm[4] == '-' && comm[5] == 'm') return true;
+    return false;
+}
+
 // ============================================================================
 // FILE SYSTEM MONITORING
 // ============================================================================
 
 // Tracepoint: openat (Enter)
 TRACEPOINT_PROBE(syscalls, sys_enter_openat) {
+    if (is_ignored()) return 0;
+
     u64 tid = get_curr_tid();
     u32 zero = 0;
     struct open_args_t *args_data = open_args_heap.lookup(&zero);
@@ -104,6 +116,8 @@ TRACEPOINT_PROBE(syscalls, sys_enter_openat) {
 
 // Tracepoint: openat (Exit)
 TRACEPOINT_PROBE(syscalls, sys_exit_openat) {
+    if (is_ignored()) return 0;
+
     u64 tid = get_curr_tid();
     struct open_args_t *saved_args = active_opens.lookup(&tid);
     
@@ -143,6 +157,8 @@ TRACEPOINT_PROBE(syscalls, sys_exit_openat) {
 
 // Tracepoint: read (Enter)
 TRACEPOINT_PROBE(syscalls, sys_enter_read) {
+    if (is_ignored()) return 0;
+
     u32 fd = args->fd;
     u64 key = ((u64)get_curr_pid() << 32) | fd;
     
@@ -170,6 +186,8 @@ TRACEPOINT_PROBE(syscalls, sys_enter_read) {
 
 // Tracepoint: write (Enter)
 TRACEPOINT_PROBE(syscalls, sys_enter_write) {
+    if (is_ignored()) return 0;
+
     u32 fd = args->fd;
     u64 key = ((u64)get_curr_pid() << 32) | fd;
     
@@ -197,6 +215,8 @@ TRACEPOINT_PROBE(syscalls, sys_enter_write) {
 
 // Tracepoint: close (Enter)
 TRACEPOINT_PROBE(syscalls, sys_enter_close) {
+    if (is_ignored()) return 0;
+
     u32 fd = args->fd;
     u64 key = ((u64)get_curr_pid() << 32) | fd;
     fd_info.delete(&key);
@@ -205,6 +225,8 @@ TRACEPOINT_PROBE(syscalls, sys_enter_close) {
 
 // Tracepoint: unlinkat (Enter)
 TRACEPOINT_PROBE(syscalls, sys_enter_unlinkat) {
+    if (is_ignored()) return 0;
+
     u32 zero = 0;
     struct event_data *event = event_heap.lookup(&zero);
     if (event) {
@@ -228,6 +250,8 @@ TRACEPOINT_PROBE(syscalls, sys_enter_unlinkat) {
 
 // Tracepoint: execve (Enter)
 TRACEPOINT_PROBE(syscalls, sys_enter_execve) {
+    if (is_ignored()) return 0;
+
     u32 zero = 0;
     struct event_data *event = event_heap.lookup(&zero);
     if (event) {
@@ -247,6 +271,8 @@ TRACEPOINT_PROBE(syscalls, sys_enter_execve) {
 
 // Tracepoint: fork (Sched)
 TRACEPOINT_PROBE(sched, sched_process_fork) {
+    if (is_ignored()) return 0;
+
     u32 zero = 0;
     struct event_data *event = event_heap.lookup(&zero);
     if (event) {
@@ -269,6 +295,8 @@ TRACEPOINT_PROBE(sched, sched_process_fork) {
 
 // Tracepoint: connect (Enter)
 TRACEPOINT_PROBE(syscalls, sys_enter_connect) {
+    if (is_ignored()) return 0;
+
     u32 zero = 0;
     struct event_data *event = event_heap.lookup(&zero);
     if (event) {
@@ -282,23 +310,28 @@ TRACEPOINT_PROBE(syscalls, sys_enter_connect) {
         bpf_get_current_comm(&event->comm, sizeof(event->comm));
         
         struct sockaddr *uaddr = (struct sockaddr *)args->uservaddr;
+        
+        // Read family first
         short family = 0;
         bpf_probe_read_user(&family, sizeof(family), &uaddr->sa_family);
         event->addr_family = family;
         
         if (family == AF_INET) {
-            struct sockaddr_in *sin = (struct sockaddr_in *)uaddr;
-            bpf_probe_read_user(&event->port, sizeof(event->port), &sin->sin_port);
-            event->port = __builtin_bswap16(event->port);
-            bpf_probe_read_user(event->ip, 4, &sin->sin_addr);
-        } else if (family == AF_INET6) {
-            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)uaddr;
-            bpf_probe_read_user(&event->port, sizeof(event->port), &sin6->sin6_port);
-            event->port = __builtin_bswap16(event->port);
-            bpf_probe_read_user(event->ip, 16, &sin6->sin6_addr);
-        } else if (family == AF_UNIX) {
-            struct sockaddr_un *sun = (struct sockaddr_un *)uaddr;
-            bpf_probe_read_user_str(event->path, sizeof(event->path), sun->sun_path);
+            struct sockaddr_in sin = {};
+            bpf_probe_read_user(&sin, sizeof(sin), uaddr);
+            event->port = __builtin_bswap16(sin.sin_port);
+            __builtin_memcpy(event->ip, &sin.sin_addr, 4);
+        } 
+        else if (family == AF_INET6) {
+            struct sockaddr_in6 sin6 = {};
+            bpf_probe_read_user(&sin6, sizeof(sin6), uaddr);
+            event->port = __builtin_bswap16(sin6.sin6_port);
+            __builtin_memcpy(event->ip, &sin6.sin6_addr, 16);
+        } 
+        else if (family == AF_UNIX) {
+            struct sockaddr_un sun = {};
+            bpf_probe_read_user(&sun, sizeof(sun), uaddr);
+            bpf_probe_read_user_str(event->path, sizeof(event->path), sun.sun_path);
         }
         
         events.perf_submit(args, event, sizeof(*event));

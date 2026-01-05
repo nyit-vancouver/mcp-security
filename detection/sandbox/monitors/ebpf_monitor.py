@@ -152,31 +152,13 @@ class eBPFMonitor:
         print("[*] eBPF monitor started. Capturing events...", file=sys.stderr)
 
     def _attach_probes(self):
-        """Attach eBPF probes to system calls"""
-        probes = [
-            # File system
-            ("sys_openat", "trace_open_entry"),
-            ("sys_read", "trace_read_entry"),
-            ("sys_write", "trace_write_entry"),
-            ("sys_unlink", "trace_unlink_entry"),
-            ("sys_unlinkat", "trace_unlink_entry"),
-            # Network
-            ("sys_socket", "trace_socket_entry"),
-            ("sys_connect", "trace_connect_entry"),
-            ("sys_sendto", "trace_sendto_entry"),
-            ("sys_recvfrom", "trace_recvfrom_entry"),
-            # Process
-            ("sys_execve", "trace_execve_entry"),
-            ("sys_clone", "trace_fork_entry"),
-            ("sys_fork", "trace_fork_entry"),
-        ]
-
-        for syscall, func_name in probes:
-            try:
-                self.bpf.attach_kprobe(event=syscall, fn_name=func_name)
-                print(f"[+] Attached probe: {syscall} -> {func_name}", file=sys.stderr)
-            except Exception as e:
-                print(f"[-] Failed to attach {syscall}: {e}", file=sys.stderr)
+        """Attach eBPF probes to system calls using tracepoints"""
+        print(f"[*] Attaching tracepoints (tracepoints are architecture-independent)", file=sys.stderr)
+        
+        # Tracepoints are already attached via TRACEPOINT_PROBE macros in BPF code
+        # No manual attachment needed - BCC handles this automatically
+        
+        print(f"[+] Tracepoints attached automatically via BPF program", file=sys.stderr)
 
     def _handle_event(self, cpu, data, size):
         """Handle events from BPF perf buffer"""

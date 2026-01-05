@@ -2,10 +2,11 @@
  * eBPF Programs for MCP Security Dynamic Analysis
  *
  * This file contains kernel-space eBPF probes for monitoring:
- * - File system operations (open, read, write, unlink)
- * - Network activities (socket, connect, send, recv)
- * - Process management (execve, fork, clone)
- * - Environment variable access (getenv via uprobe)
+ * - File system operations (openat, read, write, unlinkat)
+ * - Network activities (connect)
+ * - Process management (execve, fork)
+ *
+ * Uses TRACEPOINT_PROBE for architecture independence (x86/ARM).
  */
 
 #include <uapi/linux/ptrace.h>
@@ -14,6 +15,7 @@
 #include <linux/socket.h>
 #include <linux/in.h>
 #include <linux/in6.h>
+#include <linux/un.h>
 
 // Event types for userspace communication
 #define EVENT_FILE_OPEN     1
@@ -30,7 +32,6 @@
 
 // Maximum path/command length
 #define MAX_PATH_LEN 256
-#define MAX_CMD_LEN  128
 
 // Event structure passed to userspace
 struct event_data {
@@ -43,189 +44,181 @@ struct event_data {
     u64 size;           // File size or network bytes
     u32 flags;          // Open flags or socket type
     u32 fd;             // File descriptor
-    u32 addr_family;    // AF_INET, AF_INET6
+    u32 addr_family;    // AF_INET, AF_INET6, AF_UNIX
     u32 port;           // Network port
     u8  ip[16];         // IPv4/IPv6 address
 };
 
-// Ring buffer for events
+// Temporary storage for open/openat arguments
+struct open_args_t {
+    char fname[MAX_PATH_LEN];
+    u32 flags;
+};
+
+// Persistent storage for FD info
+struct fd_info_t {
+    char fname[MAX_PATH_LEN];
+};
+
 BPF_PERF_OUTPUT(events);
 
-// Helper to read string safely
-static inline void read_str_safe(char *dst, const char *src, size_t max_len) {
-    bpf_probe_read_user_str(dst, max_len, src);
+// Per-CPU arrays to avoid stack limit issues
+BPF_PERCPU_ARRAY(event_heap, struct event_data, 1);
+BPF_PERCPU_ARRAY(open_args_heap, struct open_args_t, 1);
+BPF_PERCPU_ARRAY(fd_info_heap, struct fd_info_t, 1);
+
+// ============================================================================
+// STATE MANAGEMENT (FD -> Filename Mapping)
+// ============================================================================
+
+BPF_HASH(active_opens, u64, struct open_args_t);
+BPF_HASH(fd_info, u64, struct fd_info_t);
+
+// Helpers
+static inline u32 get_curr_pid() {
+    return bpf_get_current_pid_tgid() >> 32;
+}
+
+static inline u64 get_curr_tid() {
+    return bpf_get_current_pid_tgid();
 }
 
 // ============================================================================
 // FILE SYSTEM MONITORING
 // ============================================================================
 
-// Hook: open/openat syscall entry
-int trace_open_entry(struct pt_regs *ctx, int dfd, const char __user *filename, int flags) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_FILE_OPEN;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-    event.flags = flags;
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-    bpf_probe_read_user_str(event.path, sizeof(event.path), filename);
-
-    events.perf_submit(ctx, &event, sizeof(event));
-    return 0;
-}
-
-// Hook: read syscall
-int trace_read_entry(struct pt_regs *ctx, unsigned int fd, char __user *buf, size_t count) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_FILE_READ;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-    event.fd = fd;
-    event.size = count;
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-
-    events.perf_submit(ctx, &event, sizeof(event));
-    return 0;
-}
-
-// Hook: write syscall
-int trace_write_entry(struct pt_regs *ctx, unsigned int fd, const char __user *buf, size_t count) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_FILE_WRITE;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-    event.fd = fd;
-    event.size = count;
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-
-    events.perf_submit(ctx, &event, sizeof(event));
-    return 0;
-}
-
-// Hook: unlink/unlinkat syscall
-int trace_unlink_entry(struct pt_regs *ctx, const char __user *pathname) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_FILE_UNLINK;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-    bpf_probe_read_user_str(event.path, sizeof(event.path), pathname);
-
-    events.perf_submit(ctx, &event, sizeof(event));
-    return 0;
-}
-
-// ============================================================================
-// NETWORK MONITORING
-// ============================================================================
-
-// Hook: socket syscall
-int trace_socket_entry(struct pt_regs *ctx, int family, int type, int protocol) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_NET_SOCKET;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-    event.addr_family = family;
-    event.flags = type;
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-
-    events.perf_submit(ctx, &event, sizeof(event));
-    return 0;
-}
-
-// Hook: connect syscall
-int trace_connect_entry(struct pt_regs *ctx, int fd, struct sockaddr __user *uaddr, int addrlen) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_NET_CONNECT;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-    event.fd = fd;
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-
-    // Read socket address
-    struct sockaddr sa;
-    bpf_probe_read_user(&sa, sizeof(sa), uaddr);
-    event.addr_family = sa.sa_family;
-
-    if (sa.sa_family == AF_INET) {
-        struct sockaddr_in *sin = (struct sockaddr_in *)&sa;
-        event.port = __builtin_bswap16(sin->sin_port);
-        bpf_probe_read_user(&event.ip, 4, &sin->sin_addr);
-    } else if (sa.sa_family == AF_INET6) {
-        struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)&sa;
-        event.port = __builtin_bswap16(sin6->sin6_port);
-        bpf_probe_read_user(&event.ip, 16, &sin6->sin6_addr);
+// Tracepoint: openat (Enter)
+TRACEPOINT_PROBE(syscalls, sys_enter_openat) {
+    u64 tid = get_curr_tid();
+    u32 zero = 0;
+    struct open_args_t *args_data = open_args_heap.lookup(&zero);
+    
+    if (args_data) {
+        __builtin_memset(args_data, 0, sizeof(*args_data));
+        bpf_probe_read_user_str(args_data->fname, sizeof(args_data->fname), args->filename);
+        args_data->flags = args->flags;
+        active_opens.update(&tid, args_data);
     }
-
-    events.perf_submit(ctx, &event, sizeof(event));
     return 0;
 }
 
-// Hook: sendto syscall
-int trace_sendto_entry(struct pt_regs *ctx, int fd, void __user *buff, size_t len) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_NET_SEND;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-    event.fd = fd;
-    event.size = len;
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-
-    events.perf_submit(ctx, &event, sizeof(event));
+// Tracepoint: openat (Exit)
+TRACEPOINT_PROBE(syscalls, sys_exit_openat) {
+    u64 tid = get_curr_tid();
+    struct open_args_t *saved_args = active_opens.lookup(&tid);
+    
+    if (saved_args == NULL) return 0;
+    
+    int ret_fd = args->ret;
+    
+    if (ret_fd >= 0) {
+        u64 key = ((u64)get_curr_pid() << 32) | (u32)ret_fd;
+        u32 zero = 0;
+        struct fd_info_t *info = fd_info_heap.lookup(&zero);
+        if (info) {
+            __builtin_memset(info, 0, sizeof(*info));
+            __builtin_memcpy(info->fname, saved_args->fname, sizeof(info->fname));
+            fd_info.update(&key, info);
+        }
+        
+        struct event_data *event = event_heap.lookup(&zero);
+        if (event) {
+            __builtin_memset(event, 0, sizeof(*event));
+            event->event_type = EVENT_FILE_OPEN;
+            event->pid = get_curr_pid();
+            event->uid = bpf_get_current_uid_gid();
+            event->timestamp = bpf_ktime_get_ns();
+            event->fd = ret_fd;
+            event->flags = saved_args->flags;
+            bpf_get_current_comm(&event->comm, sizeof(event->comm));
+            __builtin_memcpy(event->path, saved_args->fname, sizeof(event->path));
+            
+            events.perf_submit(args, event, sizeof(*event));
+        }
+    }
+    
+    active_opens.delete(&tid);
     return 0;
 }
 
-// Hook: recvfrom syscall
-int trace_recvfrom_entry(struct pt_regs *ctx, int fd, void __user *ubuf, size_t size) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
+// Tracepoint: read (Enter)
+TRACEPOINT_PROBE(syscalls, sys_enter_read) {
+    u32 fd = args->fd;
+    u64 key = ((u64)get_curr_pid() << 32) | fd;
+    
+    struct fd_info_t *info = fd_info.lookup(&key);
+    
+    if (info) {
+        u32 zero = 0;
+        struct event_data *event = event_heap.lookup(&zero);
+        if (event) {
+            __builtin_memset(event, 0, sizeof(*event));
+            event->event_type = EVENT_FILE_READ;
+            event->pid = get_curr_pid();
+            event->uid = bpf_get_current_uid_gid();
+            event->timestamp = bpf_ktime_get_ns();
+            event->fd = fd;
+            event->size = args->count;
+            bpf_get_current_comm(&event->comm, sizeof(event->comm));
+            __builtin_memcpy(event->path, info->fname, sizeof(event->path));
+            
+            events.perf_submit(args, event, sizeof(*event));
+        }
+    }
+    return 0;
+}
 
-    event.event_type = EVENT_NET_RECV;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-    event.fd = fd;
-    event.size = size;
+// Tracepoint: write (Enter)
+TRACEPOINT_PROBE(syscalls, sys_enter_write) {
+    u32 fd = args->fd;
+    u64 key = ((u64)get_curr_pid() << 32) | fd;
+    
+    struct fd_info_t *info = fd_info.lookup(&key);
+    
+    if (info) {
+        u32 zero = 0;
+        struct event_data *event = event_heap.lookup(&zero);
+        if (event) {
+            __builtin_memset(event, 0, sizeof(*event));
+            event->event_type = EVENT_FILE_WRITE;
+            event->pid = get_curr_pid();
+            event->uid = bpf_get_current_uid_gid();
+            event->timestamp = bpf_ktime_get_ns();
+            event->fd = fd;
+            event->size = args->count;
+            bpf_get_current_comm(&event->comm, sizeof(event->comm));
+            __builtin_memcpy(event->path, info->fname, sizeof(event->path));
+            
+            events.perf_submit(args, event, sizeof(*event));
+        }
+    }
+    return 0;
+}
 
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
+// Tracepoint: close (Enter)
+TRACEPOINT_PROBE(syscalls, sys_enter_close) {
+    u32 fd = args->fd;
+    u64 key = ((u64)get_curr_pid() << 32) | fd;
+    fd_info.delete(&key);
+    return 0;
+}
 
-    events.perf_submit(ctx, &event, sizeof(event));
+// Tracepoint: unlinkat (Enter)
+TRACEPOINT_PROBE(syscalls, sys_enter_unlinkat) {
+    u32 zero = 0;
+    struct event_data *event = event_heap.lookup(&zero);
+    if (event) {
+        __builtin_memset(event, 0, sizeof(*event));
+        event->event_type = EVENT_FILE_UNLINK;
+        event->pid = get_curr_pid();
+        event->uid = bpf_get_current_uid_gid();
+        event->timestamp = bpf_ktime_get_ns();
+        
+        bpf_get_current_comm(&event->comm, sizeof(event->comm));
+        bpf_probe_read_user_str(event->path, sizeof(event->path), args->pathname);
+        
+        events.perf_submit(args, event, sizeof(*event));
+    }
     return 0;
 }
 
@@ -233,38 +226,82 @@ int trace_recvfrom_entry(struct pt_regs *ctx, int fd, void __user *ubuf, size_t 
 // PROCESS MONITORING
 // ============================================================================
 
-// Hook: execve syscall
-int trace_execve_entry(struct pt_regs *ctx, const char __user *filename,
-                       const char __user *const __user *argv) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
-
-    event.event_type = EVENT_PROC_EXEC;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
-
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-    bpf_probe_read_user_str(event.path, sizeof(event.path), filename);
-
-    events.perf_submit(ctx, &event, sizeof(event));
+// Tracepoint: execve (Enter)
+TRACEPOINT_PROBE(syscalls, sys_enter_execve) {
+    u32 zero = 0;
+    struct event_data *event = event_heap.lookup(&zero);
+    if (event) {
+        __builtin_memset(event, 0, sizeof(*event));
+        event->event_type = EVENT_PROC_EXEC;
+        event->pid = get_curr_pid();
+        event->uid = bpf_get_current_uid_gid();
+        event->timestamp = bpf_ktime_get_ns();
+        
+        bpf_get_current_comm(&event->comm, sizeof(event->comm));
+        bpf_probe_read_user_str(event->path, sizeof(event->path), args->filename);
+        
+        events.perf_submit(args, event, sizeof(*event));
+    }
     return 0;
 }
 
-// Hook: fork/clone syscall
-int trace_fork_entry(struct pt_regs *ctx) {
-    struct event_data event = {};
-    u64 pid_tgid = bpf_get_current_pid_tgid();
-    u64 uid_gid = bpf_get_current_uid_gid();
+// Tracepoint: fork (Sched)
+TRACEPOINT_PROBE(sched, sched_process_fork) {
+    u32 zero = 0;
+    struct event_data *event = event_heap.lookup(&zero);
+    if (event) {
+        __builtin_memset(event, 0, sizeof(*event));
+        event->event_type = EVENT_PROC_FORK;
+        event->pid = get_curr_pid();
+        event->uid = bpf_get_current_uid_gid();
+        event->timestamp = bpf_ktime_get_ns();
+        
+        bpf_get_current_comm(&event->comm, sizeof(event->comm));
+        
+        events.perf_submit(args, event, sizeof(*event));
+    }
+    return 0;
+}
 
-    event.event_type = EVENT_PROC_FORK;
-    event.pid = pid_tgid >> 32;
-    event.uid = uid_gid & 0xFFFFFFFF;
-    event.timestamp = bpf_ktime_get_ns();
+// ============================================================================
+// NETWORK MONITORING
+// ============================================================================
 
-    bpf_get_current_comm(&event.comm, sizeof(event.comm));
-
-    events.perf_submit(ctx, &event, sizeof(event));
+// Tracepoint: connect (Enter)
+TRACEPOINT_PROBE(syscalls, sys_enter_connect) {
+    u32 zero = 0;
+    struct event_data *event = event_heap.lookup(&zero);
+    if (event) {
+        __builtin_memset(event, 0, sizeof(*event));
+        event->event_type = EVENT_NET_CONNECT;
+        event->pid = get_curr_pid();
+        event->uid = bpf_get_current_uid_gid();
+        event->timestamp = bpf_ktime_get_ns();
+        event->fd = args->fd;
+        
+        bpf_get_current_comm(&event->comm, sizeof(event->comm));
+        
+        struct sockaddr *uaddr = (struct sockaddr *)args->uservaddr;
+        short family = 0;
+        bpf_probe_read_user(&family, sizeof(family), &uaddr->sa_family);
+        event->addr_family = family;
+        
+        if (family == AF_INET) {
+            struct sockaddr_in *sin = (struct sockaddr_in *)uaddr;
+            bpf_probe_read_user(&event->port, sizeof(event->port), &sin->sin_port);
+            event->port = __builtin_bswap16(event->port);
+            bpf_probe_read_user(event->ip, 4, &sin->sin_addr);
+        } else if (family == AF_INET6) {
+            struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *)uaddr;
+            bpf_probe_read_user(&event->port, sizeof(event->port), &sin6->sin6_port);
+            event->port = __builtin_bswap16(event->port);
+            bpf_probe_read_user(event->ip, 16, &sin6->sin6_addr);
+        } else if (family == AF_UNIX) {
+            struct sockaddr_un *sun = (struct sockaddr_un *)uaddr;
+            bpf_probe_read_user_str(event->path, sizeof(event->path), sun->sun_path);
+        }
+        
+        events.perf_submit(args, event, sizeof(*event));
+    }
     return 0;
 }

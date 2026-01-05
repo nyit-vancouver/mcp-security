@@ -17,6 +17,12 @@ echo "[*] MCP Security Dynamic Analysis Sandbox"
 echo "[*] Timeout: ${MONITOR_TIMEOUT}s"
 echo "[*] Log Level: ${LOG_LEVEL}"
 
+# Mount debugfs if not already mounted (required for eBPF tracing)
+if [ ! -d "/sys/kernel/debug/tracing" ]; then
+    echo "[*] Mounting debugfs for eBPF tracing..."
+    mount -t debugfs none /sys/kernel/debug 2>/dev/null || true
+fi
+
 # Check if BPF filesystem is mounted
 if [ ! -d "/sys/kernel/debug/tracing" ]; then
     echo "[ERROR] BPF tracing not available. Is the container running with --privileged?"
